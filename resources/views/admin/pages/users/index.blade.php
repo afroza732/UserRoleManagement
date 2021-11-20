@@ -1,18 +1,18 @@
 @extends('admin.master')
 @section('title')
-    Role List
+    User List
 @endsection
 @section('content')
 <main>
     <div class="container-fluid px-4">
         @include('admin.partials.message')
         <div class="float-right pt-5">
-            <a href="{{route('roles.create')}}" class="btn btn-primary">+Create Role</a>
+            <a href="{{route('users.create')}}" class="btn btn-primary">+Create User</a>
         </div><br>
         <div class="card mb-4">
             <div class="card-header">
                 <i class="fas fa-table me-1"></i>
-                Role Lists
+                User Lists
                
             </div>
             <div class="card-body">
@@ -21,29 +21,31 @@
                         <tr>
                             <th width="5%">Sl</th>
                             <th width="10%">Name</th>
-                            <th width="60%">Permissions</th>
-                            <th width="15%">Action</th>
+                            <th width="10%">Email</th>
+                            <th width="45%">Roles</th>
+                            <th width="20%">Action</th>
                         </tr>
                     </thead>
                     <tbody>
-                        @foreach ($roles as $key => $role)
+                        @foreach ($users as $key => $user)
                         <tr>
                             <td>{{$key + 1}}</td>
-                            <td>{{$role->name}}</td>
+                            <td>{{$user->name}}</td>
+                            <td>{{$user->email}}</td>
                             <td>
-                                @foreach ($role->permissions as $perm)
+                                @foreach ($user->roles as $role)
                                     <span class="badge badge-info mr-1">
-                                        {{ $perm->name }}
+                                        {{ $role->name }}
                                     </span>
                                 @endforeach
                             <td>
-                                <a href="{{route('roles.edit',$role->id)}}" class="btn btn-primary">Edit</a>
-                                <a class="btn btn-danger text-white" href="{{ route('roles.destroy', $role->id) }}"
-                                    onclick="event.preventDefault(); document.getElementById('delete-form-{{ $role->id }}').submit();">
+                                <a href="{{route('users.edit',$user->id)}}" class="btn btn-primary">Edit</a>
+                                <a class="btn btn-danger text-white" href="{{ route('users.destroy', $user->id) }}"
+                                    onclick="event.preventDefault(); document.getElementById('delete-form-{{ $user->id }}').submit();">
                                         Delete
                                     </a>
 
-                                    <form id="delete-form-{{ $role->id }}" action="{{ route('roles.destroy', $role->id) }}" method="POST" style="display: none;">
+                                    <form id="delete-form-{{ $user->id }}" action="{{ route('users.destroy', $user->id) }}" method="POST" style="display: none;">
                                         @method('DELETE')
                                         @csrf
                                     </form>

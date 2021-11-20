@@ -7,9 +7,9 @@ use Illuminate\Http\Request;
 use Spatie\Permission\Models\Role;
 use App\Models\User;
 use Spatie\Permission\Models\Permission;
+use Illuminate\Support\Facades\Hash;
 
-
-class RolesController extends Controller
+class UserController extends Controller
 {
     /**
      * Display a listing of the resource.
@@ -18,9 +18,9 @@ class RolesController extends Controller
      */
     public function index()
     {
-        $roles = Role::all();
-        return view('admin.pages.roles.index',[
-            'roles' => $roles
+        $users = User::all();
+        return view('admin.pages.users.index',[
+            'users' => $users
         ]);
     }
 
@@ -32,13 +32,8 @@ class RolesController extends Controller
     public function create()
     {
         $roles = Role::all();
-        $permissionGroups = User::getPermissionGroup();
-        //dd($permissionGroup);
-        $allPermissions = Permission::all();
-        return view('admin.pages.roles.create',[
+        return view('admin.pages.users.create',[
             'roles' => $roles,
-            'allPermissions' => $allPermissions,
-            'permissionGroups' => $permissionGroups,
         ]);
     }
 
@@ -51,17 +46,22 @@ class RolesController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'name' => 'required||unique:roles'
-        ],[
-            'name.required' => 'Please give input name' 
+            'name' => 'required|max:50',
+            'email' => 'required|max:100|email|unique:users',
+            'password' => 'required|min:6|confirmed',
         ]);
-        $role = Role::create(['name' => $request->name]);
-        $permissions = $request->input('permissions');
 
-        if(!empty($permissions)){
-            $role->syncPermissions($permissions);
+        $user =  new User();
+        $user->name =  $request->name;
+        $user->email =  $request->email;
+        $user->password = Hash::make($request->password);
+        $user->save();
+        $roles = $request->input('roles');
+      
+        if(!empty($roles)){
+            $user->assignRole($roles);
         }
-        session()->flash('success', 'Role has been created !!');
+        session()->flash('success', 'User has been created !!');
         return back();
     }
 
@@ -84,13 +84,11 @@ class RolesController extends Controller
      */
     public function edit($id)
     {
-        $role = Role::find($id);
-        $permissionGroups = User::getPermissionGroup();
-        $allPermissions = Permission::all();
-        return view('admin.pages.roles.edit',[
-            'role' => $role,
-            'allPermissions' => $allPermissions,
-            'permissionGroups' => $permissionGroups,
+        $user = User::find($id);
+        $roles = Role::all();
+        return view('admin.pages.users.edit',[
+            'user' => $user,
+            'roles' => $roles,
         ]);
     }
 
@@ -104,18 +102,28 @@ class RolesController extends Controller
     public function update(Request $request, $id)
     {
         //dd($request->all());
+        
         $request->validate([
-            'name' => 'required|max:100|unique:roles,name,' . $id
-        ],[
-            'name.required' => 'Please give input name' 
+            'name' => 'required|max:50',
+            'email' => 'required|max:100|email|unique:users,email,' . $id,
+            'password' => 'nullable|min:6|confirmed',
         ]);
-        $role = Role::find($id);
-        $permissions = $request->input('permissions');
 
-        if(!empty($permissions)){
-            $role->syncPermissions($permissions);
+        $user =   User::find($id);
+        $user->name = $request->name;
+        $user->email = $request->email;
+        if ($request->password) {
+            $user->password = Hash::make($request->password);
         }
-        session()->flash('success', 'Role has been updated !!');
+        $user->save();
+     
+        $user->roles()->detach();
+        $roles = $request->input('roles');
+      
+        if(!empty($roles)){
+            $user->assignRole($roles);
+        }
+        session()->flash('success', 'User has been Updated !!');
         return back();
     }
 
@@ -127,13 +135,13 @@ class RolesController extends Controller
      */
     public function destroy($id)
     {
-        $role = Role::findById($id);
+        $user = User::find($id);
        
-        if (!is_null($role)) {
-            $role->delete();
+        if (!is_null($user)) {
+            $user->delete();
         }
 
-        session()->flash('success', 'Role has been deleted !!');
+        session()->flash('success', 'User has been deleted !!');
         return back();
     }
 }

@@ -3,6 +3,7 @@
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Admin\HomeController;
 use App\Http\Controllers\Admin\RolesController;
+use App\Http\Controllers\Admin\UserController;
 /*
 |--------------------------------------------------------------------------
 | Web Routes
@@ -19,8 +20,9 @@ use App\Http\Controllers\Admin\RolesController;
 // });
 
 //*******************************admin*************************************//
-    Route::get('/admin', [HomeController::class, 'index']);
-    Route::resource('roles', RolesController::class);
+    Route::get('/admin', [HomeController::class, 'index'])->middleware(['auth']);
+    Route::resource('roles', RolesController::class)->middleware(['auth']);
+    Route::resource('users', UserController::class)->middleware(['auth']);
 
 // Route::get('/dashboard', function () {
 //     return view('dashboard');
