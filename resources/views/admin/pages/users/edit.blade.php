@@ -44,7 +44,7 @@
                         <div class="col-md-6">
                             <div class="form-group">
                                 <label for="inputPassword1">Confirm Password</label>
-                                <input class="form-control" id="inputPassword1" type="Password" name="password1" placeholder="Enter your email" />
+                                <input class="form-control" id="inputPassword1" type="Password" name="password_confirmation" placeholder="Enter your email" />
                             </div>
                         </div>
                     </div>

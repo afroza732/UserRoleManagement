@@ -7,7 +7,7 @@ use Illuminate\Http\Request;
 use Spatie\Permission\Models\Role;
 use App\Models\User;
 use Spatie\Permission\Models\Permission;
-
+use Auth;
 
 class RolesController extends Controller
 {
@@ -16,8 +16,18 @@ class RolesController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
+    public $user;
+    public function __construct(){
+        $this->middleware(function($request,$next){
+            $this->user = Auth::guard('web')->user();
+            return $next($request);
+        }) ;
+    }
     public function index()
     {
+        if(is_null($this->user) || !$this->user->can('role.view')){
+            abort('401', 'Unauthorized to access page');
+        }
         $roles = Role::all();
         return view('admin.pages.roles.index',[
             'roles' => $roles
@@ -31,6 +41,9 @@ class RolesController extends Controller
      */
     public function create()
     {
+        if(is_null($this->user) || !$this->user->can('role.create')){
+            abort('401', 'Unauthorized to access page');
+        }
         $roles = Role::all();
         $permissionGroups = User::getPermissionGroup();
         //dd($permissionGroup);
@@ -84,6 +97,9 @@ class RolesController extends Controller
      */
     public function edit($id)
     {
+        if(is_null($this->user) || !$this->user->can('role.edit')){
+            abort('401', 'Unauthorized to access page');
+        }
         $role = Role::find($id);
         $permissionGroups = User::getPermissionGroup();
         $allPermissions = Permission::all();
@@ -126,7 +142,11 @@ class RolesController extends Controller
      * @return \Illuminate\Http\Response
      */
     public function destroy($id)
+    
     {
+        if(is_null($this->user) || !$this->user->can('role.delete')){
+            abort('401', 'Unauthorized to access page');
+        }
         $role = Role::findById($id);
        
         if (!is_null($role)) {
